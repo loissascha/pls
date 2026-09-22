@@ -21,3 +21,27 @@ func TestReadFile(t *testing.T) {
 	}
 	fmt.Println("testprintJob", testprintJob)
 }
+
+func TestRemoveComment(t *testing.T) {
+
+	// start str with a comment
+	startStr := "	go run . // this runs the code "
+	endStr := removeCommentFromLine(startStr)
+	if endStr != "	go run . " {
+		t.Errorf("failed to remove comment from line: '%s' .. result: '%s'", startStr, endStr)
+	}
+
+	// start str without a comment
+	startStr = "go run ."
+	endStr = removeCommentFromLine(startStr)
+	if endStr != "go run ." {
+		t.Errorf("failed to parse line without comment: '%s' .. result: '%s'", startStr, endStr)
+	}
+
+	// comment line
+	startStr = "// this is a comment line"
+	endStr = removeCommentFromLine(startStr)
+	if endStr != "" {
+		t.Errorf("failed to parse comment line: '%s' .. result: '%s'", startStr, endStr)
+	}
+}

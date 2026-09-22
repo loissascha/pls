@@ -27,6 +27,15 @@ func ReadFile(path string) (PlsFile, error) {
 	return res, nil
 }
 
+func removeCommentFromLine(line string) string {
+	index := strings.Index(line, "//")
+	if index == -1 {
+		return line
+	}
+	line = line[:index]
+	return line
+}
+
 func parseData(data []byte) (PlsFile, error) {
 	lines := bytes.Split(bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n")), []byte("\n"))
 
