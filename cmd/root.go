@@ -24,6 +24,7 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("cmd")
+		fmt.Println(args)
 	},
 }
 
