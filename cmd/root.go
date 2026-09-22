@@ -36,16 +36,14 @@ For example for a set of commands that's necessary to build your application.`,
 
 		if len(args) == 0 {
 			fmt.Println("Please provide a job name. Available are:")
-			for name, _ := range plsF.Jobs {
-				fmt.Printf("%s, ", name)
-			}
-			fmt.Println("")
+			fmt.Println(getJobsList(plsF))
 			return
 		}
 
 		job, found := plsF.Jobs[args[0]]
 		if !found {
-			fmt.Println("Job not found.")
+			fmt.Println("Job not found. Available are:")
+			fmt.Println(getJobsList(plsF))
 			return
 		}
 
@@ -55,6 +53,21 @@ For example for a set of commands that's necessary to build your application.`,
 		}
 
 	},
+}
+
+func getJobsList(plsF plsfile.PlsFile) string {
+	var builder strings.Builder
+
+	first := true
+	for name, _ := range plsF.Jobs {
+		if !first {
+			builder.WriteString(", ")
+		}
+		first = false
+		builder.WriteString(name)
+	}
+
+	return builder.String()
 }
 
 func runCommands(commands []string) error {
