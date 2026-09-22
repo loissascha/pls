@@ -49,8 +49,6 @@ func parseData(data []byte) (PlsFile, error) {
 		l := removeCommentFromLine(string(line))
 		l = strings.TrimSpace(l)
 
-		// TODO: remove comments if there are any
-
 		if l == "" {
 			continue
 		}
