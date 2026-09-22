@@ -3,8 +3,8 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 */
 package main
 
-import "local/plsfile/cmd/pls"
+import "local/plsfile/cmd"
 
 func main() {
-	pls.Execute()
+	cmd.Execute()
 }
