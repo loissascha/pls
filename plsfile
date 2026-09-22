@@ -1,0 +1,7 @@
+#:build
+	echo "Starting build!"
+	go build -o pls .
+	echo "Build finished!"
+
+#: testprint 
+	echo "This is a test!"

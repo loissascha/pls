@@ -5,7 +5,9 @@ package cmd
 
 import (
 	"fmt"
+	"local/plsfile/internal/plsfile"
 	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
@@ -23,9 +25,48 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("cmd")
-		fmt.Println(args)
+		file, err := cmd.Flags().GetString("file")
+		if err != nil {
+			panic(err)
+		}
+
+		plsF, err := plsfile.ReadFile(file)
+		if err != nil {
+			panic(err)
+		}
+
+		if len(args) == 0 {
+			fmt.Println("Please provide a job name. Available are:")
+			for name, _ := range plsF.Jobs {
+				fmt.Printf("%s, ", name)
+			}
+			fmt.Println("")
+			return
+		}
+
+		job, found := plsF.Jobs[args[0]]
+		if !found {
+			fmt.Println("Job not found.")
+			return
+		}
+
+		for _, c := range job.Commands {
+			err := runCommand(c)
+			if err != nil {
+				panic(err)
+			}
+		}
 	},
+}
+
+func runCommand(name string) error {
+	cmd := exec.Command("sh", "-c", name)
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	return cmd.Run()
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -46,5 +87,5 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().StringP("file", "f", "plsfile", "which file/path should be used. Default is ./plsfile")
 }
