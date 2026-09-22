@@ -8,6 +8,7 @@ import (
 	"local/plsfile/internal/plsfile"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -50,13 +51,23 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		for _, c := range job.Commands {
-			err := runCommand(c)
-			if err != nil {
-				panic(err)
-			}
+		err = runCommands(job.Commands)
+		if err != nil {
+			panic(err)
 		}
+
 	},
+}
+
+func runCommands(commands []string) error {
+	script := strings.Join(commands, "\n")
+	cmd := exec.Command("sh", "-c", script)
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	return cmd.Run()
 }
 
 func runCommand(name string) error {

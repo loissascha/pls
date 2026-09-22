@@ -5,3 +5,10 @@
 
 #: testprint 
 	echo "This is a test!"
+
+#: ls
+	cd cmd
+	ls
+	cd ..
+	cd internal/plsfile
+	ls
