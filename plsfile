@@ -1,11 +1,14 @@
+// build pls
 #:build
 	echo "Starting build!"
 	go build -o pls .
 	echo "Build finished!"
 
+// test
 #: testprint 
 	echo "This is a test!"
 
+// test
 #: ls
 	cd cmd
 	ls
