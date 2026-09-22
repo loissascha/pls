@@ -60,18 +60,8 @@ to quickly create a Cobra application.`,
 }
 
 func runCommands(commands []string) error {
-	script := strings.Join(commands, "\n")
+	script := "set -e\n" + strings.Join(commands, "\n")
 	cmd := exec.Command("sh", "-c", script)
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-
-	return cmd.Run()
-}
-
-func runCommand(name string) error {
-	cmd := exec.Command("sh", "-c", name)
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
