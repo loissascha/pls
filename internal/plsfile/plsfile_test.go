@@ -10,8 +10,14 @@ func TestReadFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for n, j := range f.Jobs {
-		fmt.Println("job name:", n)
-		fmt.Println(j)
+	buildJob, found := f.Jobs["build"]
+	if !found {
+		t.Fatal("job 'build' not found")
 	}
+	fmt.Println("buildJob", buildJob)
+	testprintJob, found := f.Jobs["testprint"]
+	if !found {
+		t.Fatal("job 'testprint' not found")
+	}
+	fmt.Println("testprintJob", testprintJob)
 }
