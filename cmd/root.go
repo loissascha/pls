@@ -9,6 +9,7 @@ import (
 	"local/plsfile/internal/plsfile"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -16,57 +17,63 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "pls",
-	Short: "pls help me run a set of commands",
-	Long: `pls is a cli tool that helps you run a set of commands in your console.
+	Use:   "pls [job]",
+	Short: "Run named command jobs from a plsfile",
+	Long: `pls runs named groups of shell commands defined in a local plsfile.
 
-For example for a set of commands that's necessary to build your application.`,
+	For example, use "pls build" to run the job named "build". If no file is
+	specified, pls uses ./plsfile. Run "pls" without a job name to list the
+	available jobs.`,
+	SilenceUsage: true,
 
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		file, err := cmd.Flags().GetString("file")
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		plsF, err := plsfile.ReadFile(file)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
-				fmt.Printf("The file '%s' was not found. Use --help for more information.\n", file)
-				return
+				return fmt.Errorf("plsfile %q not found", file)
 			}
-			panic(err)
+			return fmt.Errorf("could not read plsfile %q: %w", file, err)
 		}
 
 		if len(args) == 0 {
-			fmt.Printf("No job name provided. Available are: %s\n", getJobsList(plsF))
-			return
+			fmt.Fprintf(cmd.OutOrStdout(), "No job specified. Available jobs: %s\nRun 'pls <job>' to execute one.\n", getJobsList(plsF))
+			return nil
 		}
 
 		job, found := plsF.Jobs[args[0]]
 		if !found {
-			fmt.Printf("Job %s not found. Available jobs are: %s\n", args[0], getJobsList(plsF))
-			return
+			return fmt.Errorf("job %q not found. Available jobs: %s", args[0], getJobsList(plsF))
 		}
 
 		err = runCommands(job.Commands)
 		if err != nil {
-			panic(err)
+			return fmt.Errorf("job %q failed: %w", args[0], err)
 		}
 
+		return nil
 	},
 }
 
 func getJobsList(plsF plsfile.PlsFile) string {
+	names := make([]string, 0, len(plsF.Jobs))
+	for name := range plsF.Jobs {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
 	var builder strings.Builder
 
-	first := true
-	for name, _ := range plsF.Jobs {
-		if !first {
+	for i, name := range names {
+		if i > 0 {
 			builder.WriteString(", ")
 		}
-		first = false
 		builder.WriteString(name)
 	}
 
@@ -102,5 +109,5 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().StringP("file", "f", "plsfile", "which file/path should be used. Default is ./plsfile")
+	rootCmd.Flags().StringP("file", "f", "plsfile", "path to the plsfile to use")
 }
