@@ -4,6 +4,7 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"local/plsfile/internal/plsfile"
 	"os"
@@ -31,19 +32,21 @@ For example for a set of commands that's necessary to build your application.`,
 
 		plsF, err := plsfile.ReadFile(file)
 		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				fmt.Printf("The file '%s' was not found. Use --help for more information.\n", file)
+				return
+			}
 			panic(err)
 		}
 
 		if len(args) == 0 {
-			fmt.Println("Please provide a job name. Available are:")
-			fmt.Println(getJobsList(plsF))
+			fmt.Printf("No job name provided. Available are: %s\n", getJobsList(plsF))
 			return
 		}
 
 		job, found := plsF.Jobs[args[0]]
 		if !found {
-			fmt.Println("Job not found. Available are:")
-			fmt.Println(getJobsList(plsF))
+			fmt.Printf("Job %s not found. Available jobs are: %s\n", args[0], getJobsList(plsF))
 			return
 		}
 
